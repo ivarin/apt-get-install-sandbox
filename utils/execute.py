@@ -1,8 +1,9 @@
 from multiprocessing import Process, Manager
 from time import sleep
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE
 from utils import *
 from collections import namedtuple
+import re
 
 
 class Execute:
@@ -12,18 +13,17 @@ class Execute:
         # self.stderr = None
         # self.rc = None
 
-    def run(self, cmd, buff=None, sudo=True):
+    @staticmethod
+    def run(cmd, buff=None, sudo=True):
         logger.info('running %s' % cmd)
         cmd = cmd.split()
-        sudo_cmd = ['sudo'] + cmd
+        sudo_cmd = ['sudo', '-S'] + cmd
         proc = Popen(sudo_cmd if sudo else cmd,
                      stderr=PIPE, stdout=PIPE, stdin=PIPE,
                      universal_newlines=True)
 
-        import pdb
-        pdb.set_trace()
-        prompt = proc.communicate(input='  \n', timeout=5)
-        stderr, stdout = prompt
+        prompt = proc.communicate(input='  \n', timeout=60)
+        stdout, stderr = prompt
 
         rc = proc.returncode
 
@@ -57,19 +57,20 @@ class Execute:
         return self.run(cmd)
 
     def purge(self, packages):
+        packages = [packages] if type(packages) == str else packages
         cmd = 'apt-get purge %s -y' % ' '.join(packages)
-        return self.run(cmd)
+        assert self.run(cmd)['rc'] == 0
+        self.run('apt-get clean')
+        return
 
     def package_installed(self, package_name):
         out = None
         inst_pckg = namedtuple('installed_package', 'name version platform description')
         std = self.run('dpkg -l')['stdout']
         lines = std.split('\n')
-        pattern = r'ii\s*([^ \n]*)\s*([^ \n]*)\s*([^ \n]*)\s*([\w\s]*)\s'
         for line in lines:
-            pkg = re.match(pattern, line)
+            pkg = re.match(r'ii\s*([^ \n]*)\s*([^ \n]*)\s*([^ \n]*)\s*([\w\s]*)\s', line)
             if pkg:
-                if package_name and any([package_name == pkg.groups()[0],
-                                         package_name in pkg.groups()[3]]):
+                if package_name == pkg.groups()[0]:
                     out = inst_pckg(*pkg.groups())
         return out

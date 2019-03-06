@@ -1,5 +1,3 @@
-from utils import run
-
 def test_apt_install(missing_packages, exc):
     """
     run install against single and multiple options
@@ -34,8 +32,13 @@ def test_unknown_version(exc):
     assert exc.install('mc=0.0')['stderr']
 
 
-def test_no_connection():
-    pass
+def test_bad_connection(bad_network, exc, random_package):
+    """
+    check package installed with network issues
+    """
+    exc.purge(random_package)
+    assert exc.install(random_package)['rc'] == 0
+    assert exc.package_installed(random_package)
 
 
 def test_multiple_instances(exc):
@@ -47,10 +50,6 @@ def test_multiple_instances(exc):
 
 def test_sigkill(exc):
     pass
-
-
-def test_missing_lock_files(remove_lock_files, exc):
-    print(exc.run('apt-get install'))
 
 
 def test_install_itself(exc):
