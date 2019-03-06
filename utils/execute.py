@@ -1,6 +1,6 @@
 from multiprocessing import Process, Manager
 from time import sleep
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
 from utils import *
 from collections import namedtuple
 
@@ -8,7 +8,6 @@ from collections import namedtuple
 class Execute:
     def __init__(self, *args, **kwargs):
         self.sudo = kwargs.get('sudo') or kwargs.get('root')
-        self.proc = None
         # self.stdout = None
         # self.stderr = None
         # self.rc = None
@@ -16,21 +15,23 @@ class Execute:
     def run(self, cmd, buff=None, sudo=True):
         logger.info('running %s' % cmd)
         cmd = cmd.split()
-        sudo_cmd = ['sudo', '-S'] + cmd
-        self.proc = Popen(sudo_cmd if sudo else cmd,
-                          stderr=PIPE, stdout=PIPE, stdin=PIPE,
-                          universal_newlines=True)
+        sudo_cmd = ['sudo'] + cmd
+        proc = Popen(sudo_cmd if sudo else cmd,
+                     stderr=PIPE, stdout=PIPE, stdin=PIPE,
+                     universal_newlines=True)
 
-        # stderr = self.proc.stderr.read()
+        import pdb
+        pdb.set_trace()
+        prompt = proc.communicate(input='  \n', timeout=5)
+        stderr, stdout = prompt
 
-        prompt = self.proc.communicate(self.sudo + '\n')
-        stdout = prompt[0]
-        rc = self.proc.returncode
+        rc = proc.returncode
+
         if buff and stderr:
-            buff.update({' '.join(cmd): stdout})
+            buff.update({' '.join(cmd): stderr})
         return {
             'stdout': stdout,
-            # 'stderr': stderr,
+            'stderr': stderr,
             'rc': rc
         }
 
@@ -39,14 +40,14 @@ class Execute:
         manager = Manager()
         buff = manager.dict()
         for cmd in cmds:
-            buff.update({cmd: ''})
+            buff.update({cmd: 'nothing here'})
             p = Process(target=self.run, args=(cmd, buff))
             jobs.append(p)
             sleep(0.5)
             p.start()
 
         for proc in jobs:
-            proc.join(timeout=5)
+            proc.join()
 
         return buff
 
@@ -72,4 +73,3 @@ class Execute:
                                          package_name in pkg.groups()[3]]):
                     out = inst_pckg(*pkg.groups())
         return out
-

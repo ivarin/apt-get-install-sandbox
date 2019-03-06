@@ -19,7 +19,7 @@ def run(cmd):
               universal_newlines=True)
     prompt = p.communicate('  ' + '\n')
     return {'stdout': prompt[0],
-            'stderr': '',
+            'stderr': prompt[1],
             'pid': p.pid}
 
 

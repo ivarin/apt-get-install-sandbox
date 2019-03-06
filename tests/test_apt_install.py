@@ -1,5 +1,4 @@
-# from utils import package_installed
-
+from utils import run
 
 def test_apt_install(missing_packages, exc):
     """
@@ -31,8 +30,8 @@ def test_unknown_package(exc):
     assert run['rc'] == 100
 
 
-def test_unknown_version():
-    pass
+def test_unknown_version(exc):
+    assert exc.install('mc=0.0')['stderr']
 
 
 def test_no_connection():
@@ -43,10 +42,7 @@ def test_multiple_instances(exc):
     """
     check apt-get install cannot run in parallel
     """
-    cmd = 'apt-get install'
-    run = exc.commands([cmd] * 2)
-    assert 'Could not get lock' in run[cmd]
-    assert 'Unable to acquire the dpkg frontend lock' in run[cmd]
+    assert 'Could not get lock' in exc.commands(['apt-get install'] * 2).values()[0]
 
 
 def test_sigkill(exc):
