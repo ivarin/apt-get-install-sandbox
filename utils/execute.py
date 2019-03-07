@@ -8,17 +8,17 @@ import re
 
 class Execute:
     def __init__(self, *args, **kwargs):
-        self.sudo = kwargs.get('sudo') or kwargs.get('root')
+        self.sudo = kwargs.get('sudo', False)
+        self.password = kwargs.get('password') or kwargs.get('pass')
         # self.stdout = None
         # self.stderr = None
         # self.rc = None
 
-    @staticmethod
-    def run(cmd, buff=None, sudo=False):
+    def run(self, cmd, buff=None):
         logger.info('running %s' % cmd)
         cmd = cmd.split()
         sudo_cmd = ['sudo', '-S'] + cmd
-        proc = Popen(sudo_cmd if sudo else cmd,
+        proc = Popen(sudo_cmd if self.sudo else cmd,
                      stderr=PIPE, stdout=PIPE, stdin=PIPE,
                      universal_newlines=True)
 

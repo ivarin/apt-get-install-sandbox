@@ -9,7 +9,13 @@ packages = conf.get('install', 'packages').split(', ')
 
 @pytest.fixture
 def exc():
-    exc = Execute(sudo=conf.get('install', 'sudo').strip('"'))
+    exc = Execute(password=conf.get('install', 'sudo').strip('"'), sudo=True)
+    yield exc
+
+
+@pytest.fixture
+def exc_sudoless():
+    exc = Execute()
     yield exc
 
 

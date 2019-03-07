@@ -14,10 +14,6 @@ def test_already_installed(install_packages, exc):
             in exc.install(install_packages)['stdout'])
 
 
-def test_older_version():
-    pass
-
-
 def test_unknown_package(exc):
     """
     validate proper handle of unsuccessful installation
@@ -49,6 +45,7 @@ def test_multiple_instances(exc):
 
 
 def test_sigkill(exc):
+    # always getting grep error: garbage option
     pass
 
 
@@ -56,3 +53,7 @@ def test_install_itself(exc):
     package = 'apt'
     assert ('is already the newest version (%s)' % exc.package_installed(package).version
             in exc.install(package)['stdout'])
+
+
+def test_not_sudo(exc_sudoless):
+    assert 'Permission denied' in exc_sudoless.run('apt-get install')['stderr']
