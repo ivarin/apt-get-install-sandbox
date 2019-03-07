@@ -1,3 +1,7 @@
+import pytest
+from utils import *
+
+
 def test_apt_install(missing_packages, exc):
     """
     run install against single and multiple options
@@ -55,5 +59,6 @@ def test_install_itself(exc):
             in exc.install(package)['stdout'])
 
 
+@pytest.mark.skipif(dockerized(), reason='running in docker, no sudo')
 def test_not_sudo(exc_sudoless):
     assert 'Permission denied' in exc_sudoless.run('apt-get install')['stderr']

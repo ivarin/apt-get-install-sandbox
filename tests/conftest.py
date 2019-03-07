@@ -9,7 +9,7 @@ packages = conf.get('install', 'packages').split(', ')
 
 @pytest.fixture
 def exc():
-    exc = Execute(password=conf.get('install', 'sudo').strip('"'), sudo=True)
+    exc = Execute(password=conf.get('install', 'password').strip('"'), sudo=not dockerized())
     yield exc
 
 

@@ -8,7 +8,7 @@ import re
 
 class Execute:
     def __init__(self, *args, **kwargs):
-        self.sudo = kwargs.get('sudo', False)
+        self.sudo = kwargs.get('sudo')
         self.password = kwargs.get('password') or kwargs.get('pass')
         # self.stdout = None
         # self.stderr = None
@@ -22,7 +22,8 @@ class Execute:
                      stderr=PIPE, stdout=PIPE, stdin=PIPE,
                      universal_newlines=True)
 
-        prompt = proc.communicate(input='  \n', timeout=60)
+        prompt = proc.communicate(input='%s\n' % self.password if self.sudo else '',
+                                  timeout=60)
         stdout, stderr = prompt
 
         rc = proc.returncode
