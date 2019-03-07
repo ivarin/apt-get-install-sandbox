@@ -35,9 +35,11 @@ def remove_lock_files(exc):
 
 @pytest.fixture(params=['slow', 'loss'])
 def bad_network(exc, request):
+    if not exc.package_installed('tc'):
+        exc.install('iproute2')
     cmd = {
-        'slow': 'tc qdisc add dev enp0s3 root netem delay 1001ms',
-        'loss': 'tc qdisc add dev enp0s3 root netem loss 25%'
+        'slow': '/sbin/tc qdisc add dev enp0s3 root netem delay 1001ms',
+        'loss': '/sbin/tc qdisc add dev enp0s3 root netem loss 25%'
     }
     exc.run(cmd[request.param])
     yield request.param

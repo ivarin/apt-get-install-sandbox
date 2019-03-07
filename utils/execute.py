@@ -14,7 +14,7 @@ class Execute:
         # self.rc = None
 
     @staticmethod
-    def run(cmd, buff=None, sudo=True):
+    def run(cmd, buff=None, sudo=False):
         logger.info('running %s' % cmd)
         cmd = cmd.split()
         sudo_cmd = ['sudo', '-S'] + cmd
