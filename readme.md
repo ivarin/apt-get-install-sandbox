@@ -16,7 +16,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 pytest tests/ --junitxml=./report.xml
 ```
-hopefully, this will output something like this:
+hopefully, this will output [s]omething like this:
 ```
 collected 11 items                                                                                                        
 
